@@ -15,6 +15,17 @@ class TicketRepo:
     @staticmethod
     def create_ticket(data):
         try:
+            # Check if existing ticket with the same event name and location and time
+            existing_ticket = Ticket.query.filter_by(
+                event_name=data.get("event_name"),
+                location=data.get("location"),
+                time=data.get("time"),
+            ).first()
+            if existing_ticket:
+                raise ValueError(
+                    "Ticket with the same event name, location, and time already exists."
+                )
+
             ticket = Ticket(
                 event_name=data.get("event_name"),
                 location=data.get("location"),

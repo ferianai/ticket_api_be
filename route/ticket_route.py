@@ -42,7 +42,12 @@ class TicketAPI(MethodView):
             return jsonify({"error": "Invalid input"}), 400
         # Validate required fields
         if "event_name" not in data or "time" not in data:
-            return jsonify({"error": "Missing required fields: event_name, time"}), 400
+            return (
+                jsonify(
+                    {"error": "Missing required fields: event_name, location or time"}
+                ),
+                400,
+            )
         try:
             # Parse time string to datetime
             data["time"] = datetime.fromisoformat(data["time"])
@@ -57,7 +62,14 @@ class TicketAPI(MethodView):
                 "time": ticket.time.isoformat() if ticket.time else None,
                 "is_used": ticket.is_used,
             }
-            return jsonify(ticket_data), 201
+            return (
+                jsonify(
+                    {"message": "Ticket created successfully", "ticket": ticket_data}
+                ),
+                201,
+            )
+        except ValueError as ve:
+            return jsonify({"error": str(ve)}), 400
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
