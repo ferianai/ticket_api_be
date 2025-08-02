@@ -2,6 +2,7 @@ import models  # noqa: F401
 from flask import Flask
 from instance.database import init_db
 from route.index_route import index_bp
+from route.ticket_route import ticket_bp
 
 
 def create_app(config_module="config.configure"):
@@ -16,5 +17,6 @@ def create_app(config_module="config.configure"):
 
     # Initialize extensions, blueprints, etc. here
     app.register_blueprint(index_bp)
+    app.register_blueprint(ticket_bp)
 
     return app
