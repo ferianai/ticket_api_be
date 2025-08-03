@@ -1,4 +1,5 @@
 from repo.ticket_repo import TicketRepo
+from shared.crono import now
 
 
 class TicketService:
@@ -15,6 +16,8 @@ class TicketService:
 
     @staticmethod
     def create_ticket(data):
+        if data["time"] < now():
+            raise ValueError("Time must be in the future")
         return TicketRepo.create_ticket(data)
 
     @staticmethod

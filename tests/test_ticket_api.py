@@ -1,9 +1,17 @@
 import pytest
-from datetime import datetime, timedelta
+from datetime import timedelta
 from shared.crono import now
-from instance.database import db
-from models.ticket import Ticket
-import json
+
+
+# Helper function to build ticket data
+# This function creates a dictionary with default values for a ticket. It can be customized by passing different parameters.
+def build_ticket_data(name="Concert", location="Stadium", days=1, is_used=False):
+    return {
+        "event_name": name,
+        "location": location,
+        "time": (now() + timedelta(days=days)).isoformat(),
+        "is_used": is_used,
+    }
 
 
 def test_get_all_tickets_empty(client):
@@ -13,48 +21,31 @@ def test_get_all_tickets_empty(client):
 
 
 def test_create_ticket_success(client):
-    data = {
-        "event_name": "Concert",
-        "location": "Stadium",
-        "time": (now() + timedelta(days=1)).isoformat(),
-        "is_used": False,
-    }
-    response = client.post("/tickets", json=data)
+    response = client.post("/tickets", json=build_ticket_data())
     assert response.status_code == 201
-    json_data = response.json["ticket"]
-    assert json_data["event_name"] == data["event_name"]
-    assert json_data["location"] == data["location"]
-    assert json_data["is_used"] == False
+    ticket = response.json["ticket"]
+    assert ticket["event_name"] == "Concert"
+    assert ticket["location"] == "Stadium"
+    assert ticket["is_used"] is False
 
 
 def test_create_ticket_missing_fields(client):
-    data = {"location": "Stadium"}
-    response = client.post("/tickets", json=data)
+    response = client.post("/tickets", json={"location": "Stadium"})
     assert response.status_code == 400
     assert "Missing required fields" in response.json.get("error", "")
 
 
 def test_create_ticket_invalid_time(client):
-    data = {
-        "event_name": "Concert",
-        "location": "Stadium",
-        "time": "invalid-time-format",
-    }
+    data = build_ticket_data()
+    data["time"] = "not-a-valid-time"
     response = client.post("/tickets", json=data)
     assert response.status_code == 400
     assert "Invalid time format" in response.json.get("error", "")
 
 
 def test_get_ticket_by_id(client):
-    # Create ticket first
-    data = {
-        "event_name": "Show",
-        "location": "Theater",
-        "time": (now() + timedelta(days=2)).isoformat(),
-        "is_used": False,
-    }
-    post_resp = client.post("/tickets", json=data)
-    ticket_id = post_resp.json["ticket"]["id"]
+    post = client.post("/tickets", json=build_ticket_data(name="Show", days=2))
+    ticket_id = post.json["ticket"]["id"]
 
     get_resp = client.get(f"/tickets/{ticket_id}")
     assert get_resp.status_code == 200
@@ -68,19 +59,12 @@ def test_get_ticket_not_found(client):
 
 
 def test_patch_mark_ticket_as_used(client):
-    # Create ticket first
-    data = {
-        "event_name": "Event",
-        "location": "Venue",
-        "time": (now() + timedelta(days=3)).isoformat(),
-        "is_used": False,
-    }
-    post_resp = client.post("/tickets", json=data)
-    ticket_id = post_resp.json["ticket"]["id"]
+    post = client.post("/tickets", json=build_ticket_data(name="Event", days=3))
+    ticket_id = post.json["ticket"]["id"]
 
-    patch_resp = client.patch(f"/tickets/{ticket_id}")
-    assert patch_resp.status_code == 200
-    assert patch_resp.json["is_used"] == True
+    patch = client.patch(f"/tickets/{ticket_id}")
+    assert patch.status_code == 200
+    assert patch.json["is_used"] is True
 
 
 def test_patch_ticket_not_found(client):
@@ -90,15 +74,8 @@ def test_patch_ticket_not_found(client):
 
 
 def test_delete_ticket(client):
-    # Create ticket first
-    data = {
-        "event_name": "Delete Event",
-        "location": "Delete Venue",
-        "time": (now() + timedelta(days=4)).isoformat(),
-        "is_used": False,
-    }
-    post_resp = client.post("/tickets", json=data)
-    ticket_id = post_resp.json["ticket"]["id"]
+    post = client.post("/tickets", json=build_ticket_data(name="To Delete", days=4))
+    ticket_id = post.json["ticket"]["id"]
 
     delete_resp = client.delete(f"/tickets/{ticket_id}")
     assert delete_resp.status_code == 200
@@ -109,3 +86,16 @@ def test_delete_ticket_not_found(client):
     response = client.delete("/tickets/999999")
     assert response.status_code == 404
     assert "Ticket not found" in response.json.get("error", "")
+
+
+def test_create_ticket_duplicate_should_fail(client):
+    data = {
+        "event_name": "Same Event",
+        "location": "Same Place",
+        "time": (now() + timedelta(days=5)).isoformat(),
+        "is_used": False,
+    }
+    client.post("/tickets", json=data)
+    response = client.post("/tickets", json=data)
+    assert response.status_code == 400
+    assert "already exists" in response.json.get("error", "")
