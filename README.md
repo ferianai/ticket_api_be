@@ -3,21 +3,21 @@
 **TiketQ API** is a simple backend service built with Flask that allows you to manage event tickets. It provides RESTful endpoints for creating, retrieving, updating, and deleting ticket records.
 
 Each ticket includes event details and a usage status. The API ensures clean code structure, validation, and error handling best practices.
+API Documentation : [Postman-Collection](https://documenter.getpostman.com/view/44239234/2sB3BAMXxQ)
 
 ---
 
 ## 📚 Table of Contents
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Setup Instructions](#setup-instructions)
-- [Running the Application](#running-the-application)
-- [API Endpoints](#api-endpoints)
-- [Ticket Schema](#ticket-schema)
-- [Testing](#testing)
-- [Postman Collection](#postman-collection)
-- [Project Structure](#project-structure)
-- [License](#license)
+- [Features](#-features)
+- [Prerequisites](#️-prerequisites)
+- [Setup Instructions](#️-setup-instructions)
+- [Running the Application](#️-running-the-application)
+- [API Endpoints](#️-api-endpoints)
+- [Ticket Schema](#-ticket-schema)
+- [Testing](#-testing)
+- [Project Structure](#-project-structure)
+- [License](#️-license)
 
 ---
 
@@ -209,14 +209,6 @@ Test cases are located in the `tests/` folder and include:
 - Ticket creation
 - Get ticket by ID
 - Update and delete logic
-
----
-
-## 📬 Postman Collection
-
-Test and explore the API using this public Postman documentation:
-
-🔗 [TiketQ API — Postman Docs](https://documenter.getpostman.com/view/44239234/2sB3BAMXxQ)
 
 ---
 
