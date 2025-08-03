@@ -32,9 +32,11 @@ class TicketAPI(MethodView):
         if not data:
             return jsonify({"error": "Invalid input"}), 400
 
-        if "event_name" not in data or "time" not in data:
+        if "event_name" not in data or "time" not in data or "location" not in data:
             return (
-                jsonify({"error": "Missing required fields: event_name or time"}),
+                jsonify(
+                    {"error": "Missing required fields: event_name, time, or location"}
+                ),
                 400,
             )
 
@@ -57,6 +59,11 @@ class TicketAPI(MethodView):
         except ValueError as ve:
             return jsonify({"error": str(ve)}), 400
         except Exception as e:
+            # Log the actual error for debugging
+            import traceback
+
+            print(f"Unexpected error in ticket creation: {str(e)}")
+            traceback.print_exc()
             return jsonify({"error": "Internal Server Error"}), 500
 
     def patch(self, ticket_id):

@@ -176,13 +176,33 @@ flask --app app run --port 8000 --reload --debug
 Example JSON response from `/tickets`:
 
 ```json
-{
-  "id": 1,
-  "event_name": "Music Festival",
-  "location": "Jakarta Convention Center",
-  "time": "2025-08-15T19:30:00",
-  "is_used": false
-}
+[
+  {
+    "event_name": "Soundrenaline 2025",
+    "location": "Carnival Beach Ancol, Jakarta",
+    "time": "2025-09-21T16:00:00+00:00"
+  },
+  {
+    "event_name": "We The Fest: Pasaraya Edition",
+    "location": "Pasaraya Blok M, Jakarta",
+    "time": "2025-10-12T18:00:00+00:00"
+  },
+  {
+    "event_name": "Dewa 19 Ft. Virzha & Ello",
+    "location": "Lapangan Gasibu, Bandung",
+    "time": "2025-08-30T19:00:00+00:00"
+  },
+  {
+    "event_name": "Kunto Aji - Cultural Night",
+    "location": "Alun-Alun Kidul, Yogyakarta",
+    "time": "2025-11-18T20:00:00+00:00"
+  },
+  {
+    "event_name": "Indieground Festival",
+    "location": "Taman Budaya Jawa Timur, Surabaya",
+    "time": "2025-09-07T17:30:00+00:00"
+  }
+]
 ```
 
 > Note: Unique constraint on (`event_name`, `location`, `time`)
