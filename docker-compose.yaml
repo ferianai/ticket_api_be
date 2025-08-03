@@ -1,26 +1,43 @@
+version: "3.9"
+
 services:
-  db-postgres: # 5432 default
+  db-postgres:
     image: postgres:16
     environment:
-      - POSTGRES_DB=ticket_db
-      - POSTGRES_USER=ticket_user
-      - POSTGRES_PASSWORD=password123
-    # volumes:
-    #   - ./postgres_db_data:/var/lib/postgresql/data/
+      POSTGRES_DB: ticket_db
+      POSTGRES_USER: ticket_user
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - postgres_db_data:/var/lib/postgresql/data/
     ports:
-      - "5000:5432"
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ticket_user -d ticket_db"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USER: ticket_user
+      DB_PASSWORD: password123
+      DB_HOST: db-postgres
+      DB_PORT: 5432
+      DB_NAME: ticket_db
+      JWT_SECRET_KEY: your_jwt_secret_key_here
+      JWT_ACCESS_TOKEN_EXPIRES: 3600
+      JWT_REFRESH_TOKEN_EXPIRES: 604800
+    env_file:
+    - .env
+    depends_on:
+      db-postgres:
+        condition: service_healthy
     volumes:
-      - postgres_db_data:/var/lib/postgresql/data/
+      - .:/app
 
 volumes:
   postgres_db_data:
-
-# run "docker compose up --build -d" to start the containers
-# run "docker compose down" to stop the containers
-# run "docker compose logs -f" to view the logs

@@ -1,0 +1,16 @@
+# Dockerignore file
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+.venv
+.env
+.env.local
+.env.supabase
+
+# Assets
+note.md
+readnote.md
