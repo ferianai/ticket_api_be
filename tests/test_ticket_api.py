@@ -21,7 +21,7 @@ def test_create_ticket_success(client):
     }
     response = client.post("/tickets", json=data)
     assert response.status_code == 201
-    json_data = response.json
+    json_data = response.json["ticket"]
     assert json_data["event_name"] == data["event_name"]
     assert json_data["location"] == data["location"]
     assert json_data["is_used"] == False
@@ -54,7 +54,7 @@ def test_get_ticket_by_id(client):
         "is_used": False,
     }
     post_resp = client.post("/tickets", json=data)
-    ticket_id = post_resp.json["id"]
+    ticket_id = post_resp.json["ticket"]["id"]
 
     get_resp = client.get(f"/tickets/{ticket_id}")
     assert get_resp.status_code == 200
@@ -76,7 +76,7 @@ def test_patch_mark_ticket_as_used(client):
         "is_used": False,
     }
     post_resp = client.post("/tickets", json=data)
-    ticket_id = post_resp.json["id"]
+    ticket_id = post_resp.json["ticket"]["id"]
 
     patch_resp = client.patch(f"/tickets/{ticket_id}")
     assert patch_resp.status_code == 200
@@ -98,7 +98,7 @@ def test_delete_ticket(client):
         "is_used": False,
     }
     post_resp = client.post("/tickets", json=data)
-    ticket_id = post_resp.json["id"]
+    ticket_id = post_resp.json["ticket"]["id"]
 
     delete_resp = client.delete(f"/tickets/{ticket_id}")
     assert delete_resp.status_code == 200
