@@ -29,7 +29,7 @@ Each ticket includes event details and a usage status. The API ensures clean cod
 - ✅ SQLAlchemy ORM with PostgreSQL
 - ✅ Modular Flask app structure
 - ✅ Postman collection for testing
-- ✅ Docker & `.env` ready (optional)
+- ✅ Docker & `.env` ready
 
 ---
 
@@ -101,7 +101,35 @@ flask --app app db upgrade
 
 ---
 
-## 🏃 Running the Application
+### 5. Using Docker Compose for Local Development
+
+Build and start the app with PostgreSQL:
+
+```bash
+docker compose up --build
+```
+
+This will start two services:
+
+- **db-postgres**: PostgreSQL database on port 5432
+- **web**: Flask app on port 8000
+  The web service depends on the database being healthy before starting.
+
+Run migrations via the web container shell:
+
+```bash
+docker compose exec web flask db upgrade
+```
+
+> The app will be available at: [http://localhost:8000](http://localhost:8000)
+
+shutdown the app:
+
+```bash
+docker compose down
+```
+
+## 🏃 Running the Application Locally (without Docker)
 
 Using Taskipy (`uv run task fr`):
 
@@ -167,6 +195,7 @@ Run all tests using:
 
 ```bash
 uv run pytest
+uv run pytest -s -v # full output
 ```
 
 Or directly:
@@ -212,21 +241,16 @@ ticket_api_be/
 
 ---
 
-## 📦 Optional Docker Setup (Bonus)
+## 📦 Docker Setup
 
 To run the app via Docker:
 
 ### Dockerfile (simplified)
 
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
-CMD ["flask", "--app", "app", "run", "--host=0.0.0.0", "--port=8000"]
-```
+The project uses `docker-compose.yml` for service orchestration:
 
-You can add `docker-compose.yml` if needed for DB and service orchestration.
+- **db-postgres**: runs PostgreSQL on default port 5432
+- **web**: Flask app accessible on port 8000
 
 ---
 
