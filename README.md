@@ -94,9 +94,9 @@ createdb tiketq_db
 Run migrations:
 
 ```bash
-flask --app app db init
-flask --app app db migrate -m "Initial migration"
-flask --app app db upgrade
+uv run flask db init
+uv run flask db migrate -m "Initial migration"
+uv run flask db upgrade
 ```
 
 ---
@@ -129,7 +129,7 @@ shutdown the app:
 docker compose down
 ```
 
-## 🏃 Running the Application Locally (without Docker)
+## 🏃 Running the Application Locally
 
 Using Taskipy (`uv run task fr`):
 
