@@ -15,7 +15,6 @@ class TicketRepo:
     @staticmethod
     def create_ticket(data):
         try:
-            # Check if existing ticket with the same event name and location and time
             existing_ticket = Ticket.query.filter_by(
                 event_name=data.get("event_name"),
                 location=data.get("location"),
@@ -47,9 +46,9 @@ class TicketRepo:
                 ticket.is_used = True
                 db.session.commit()
                 return ticket
-            except SQLAlchemyError as e:
+            except SQLAlchemyError:
                 db.session.rollback()
-                raise e
+                raise
         return None
 
     @staticmethod
@@ -60,7 +59,7 @@ class TicketRepo:
                 db.session.delete(ticket)
                 db.session.commit()
                 return True
-            except SQLAlchemyError as e:
+            except SQLAlchemyError:
                 db.session.rollback()
-                raise e
+                raise
         return False

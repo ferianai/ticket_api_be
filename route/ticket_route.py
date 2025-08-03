@@ -6,93 +6,75 @@ from datetime import datetime
 ticket_bp = Blueprint("ticket", __name__, url_prefix="/tickets")
 
 
+def serialize_ticket(ticket):
+    return {
+        "id": ticket.id,
+        "event_name": ticket.event_name,
+        "location": ticket.location,
+        "time": ticket.time.isoformat() if ticket.time else None,
+        "is_used": ticket.is_used,
+    }
+
+
 class TicketAPI(MethodView):
     def get(self, ticket_id=None):
-        if ticket_id is None:
-            # Return list of tickets
-            tickets = TicketService.get_all_tickets()
-            tickets_list = [
-                {
-                    "id": t.id,
-                    "event_name": t.event_name,
-                    "location": t.location,
-                    "time": t.time.isoformat() if t.time else None,
-                    "is_used": t.is_used,
-                }
-                for t in tickets
-            ]
-            return jsonify(tickets_list), 200
-        else:
-            # Return single ticket
+        try:
+            if ticket_id is None:
+                tickets = TicketService.get_all_tickets()
+                return jsonify([serialize_ticket(t) for t in tickets]), 200
             ticket = TicketService.get_ticket_by_id(ticket_id)
-            if not ticket:
-                return jsonify({"error": "Ticket not found"}), 404
-            ticket_data = {
-                "id": ticket.id,
-                "event_name": ticket.event_name,
-                "location": ticket.location,
-                "time": ticket.time.isoformat() if ticket.time else None,
-                "is_used": ticket.is_used,
-            }
-            return jsonify(ticket_data), 200
+            return jsonify(serialize_ticket(ticket)), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
 
     def post(self):
         data = request.get_json()
         if not data:
             return jsonify({"error": "Invalid input"}), 400
-        # Validate required fields
+
         if "event_name" not in data or "time" not in data:
             return (
-                jsonify(
-                    {"error": "Missing required fields: event_name, location or time"}
-                ),
+                jsonify({"error": "Missing required fields: event_name or time"}),
                 400,
             )
+
         try:
-            # Parse time string to datetime
             data["time"] = datetime.fromisoformat(data["time"])
         except Exception:
             return jsonify({"error": "Invalid time format, expected ISO format"}), 400
+
         try:
             ticket = TicketService.create_ticket(data)
-            ticket_data = {
-                "id": ticket.id,
-                "event_name": ticket.event_name,
-                "location": ticket.location,
-                "time": ticket.time.isoformat() if ticket.time else None,
-                "is_used": ticket.is_used,
-            }
             return (
                 jsonify(
-                    {"message": "Ticket created successfully", "ticket": ticket_data}
+                    {
+                        "message": "Ticket created successfully",
+                        "ticket": serialize_ticket(ticket),
+                    }
                 ),
                 201,
             )
         except ValueError as ve:
             return jsonify({"error": str(ve)}), 400
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Internal Server Error"}), 500
 
     def patch(self, ticket_id):
-        ticket = TicketService.mark_ticket_as_used(ticket_id)
-        if not ticket:
-            return jsonify({"error": "Ticket not found"}), 404
-        ticket_data = {
-            "id": ticket.id,
-            "event_name": ticket.event_name,
-            "location": ticket.location,
-            "time": ticket.time.isoformat() if ticket.time else None,
-            "is_used": ticket.is_used,
-        }
-        return jsonify(ticket_data), 200
+        try:
+            ticket = TicketService.mark_ticket_as_used(ticket_id)
+            return jsonify(serialize_ticket(ticket)), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
 
     def delete(self, ticket_id):
-        success = TicketService.delete_ticket(ticket_id)
-        if not success:
-            return jsonify({"error": "Ticket not found"}), 404
-        return jsonify({"message": "Ticket deleted successfully"}), 200
+        try:
+            TicketService.delete_ticket(ticket_id)
+            return jsonify({"message": "Ticket deleted successfully"}), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
 
 
+# Register endpoints
 ticket_view = TicketAPI.as_view("ticket_api")
 ticket_bp.add_url_rule(
     "", defaults={"ticket_id": None}, view_func=ticket_view, methods=["GET"]
